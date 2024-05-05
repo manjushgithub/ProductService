@@ -50,7 +50,7 @@ public class Fakestoreapi implements IProductservice {
             Product product = new Product();
             product.setId(response.getId());
             product.setName(response.getTitle());
-            product.setDescription(response.getDescription());
+            product.setDescr(response.getDescription());
             product.setPrice((int) response.getPrice());
             product.setCategory(new Category());
             product.getCategory().setName(response.getCategory());

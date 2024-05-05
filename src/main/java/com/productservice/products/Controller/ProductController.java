@@ -4,8 +4,7 @@ import com.productservice.products.Repository.ProductRepository;
 import com.productservice.products.dtos.ProductRequestDTOFS;
 import com.productservice.products.dtos.ProductResponceSelf;
 import com.productservice.products.model.Product;
-
-import com.productservice.products.services.Fakestoreapi;
+import com.productservice.products.services.IProductservice;
 import com.productservice.products.services.Productnotfoundexception;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,11 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class ProductController {
    @Autowired
-   Fakestoreapi productService;
+   IProductservice Productservice;
+  // Fakestoreapi productService;
    @Autowired
    ProductRepository productRepository;
     //1::get all products
@@ -26,7 +27,10 @@ public class ProductController {
     {
 
 
-        return productService.getallproducts();
+        return Productservice.getallproducts().stream().filter(
+                Product->Product.getName().startsWith("A")).
+                collect(Collectors.toList());
+
     }
     @GetMapping("/product/searchname")
     public Product getproductByName(@RequestParam("name") String name )
@@ -34,33 +38,34 @@ public class ProductController {
         return productRepository.findByname(name);
     }
 
-    //get single product
-//    @GetMapping("/products/{id}")
-//    ResponseEntity<ProductResponceSelf> getsingleproduct(@PathVariable("id") long id)
-//    {
-//        product product;
-//        try {
-//         product=productService.getsingleproduct(id);
-//        }catch(Productnotfoundexception e)//here we are all carching exceptiion in this object only be proper exception handling
-//        {
-//            return new ResponseEntity<>(new ProductResponceSelf(null,"product doesn't exist" ),HttpStatus.NOT_FOUND);
-//        }
-//        catch(ArithmeticException e)//here we are all carching exceptiion in this object only be proper exception handling
-//        {
-//            return new ResponseEntity<>(new ProductResponceSelf(null,"someything went wrong" ),HttpStatus.INTERNAL_SERVER_ERROR);
-//
-//        }
-//        return new ResponseEntity<>(new ProductResponceSelf(product,"Success"), HttpStatus.OK);
-//    }
+   // get single product
+    @GetMapping("/products/{id}")
+    ResponseEntity<ProductResponceSelf> getsingleproduct(@PathVariable("id") long id)
+    {
+        Product product;
+        try {
+         product=Productservice.getsingleproduct(id);
+        }
+        catch(Productnotfoundexception e)//here we are all carching exceptiion in this object only be proper exception handling
+        {
+            return new ResponseEntity<>(new ProductResponceSelf(null,"product doesn't exist" ), HttpStatus.NOT_FOUND);
+        }
+        catch(ArithmeticException e)//here we are all carching exceptiion in this object only be proper exception handling
+        {
+            return new ResponseEntity<>(new ProductResponceSelf(null,"someything went wrong" ),HttpStatus.INTERNAL_SERVER_ERROR);
 
-    //main
-    @GetMapping("/product/exception/{id}")
-    ResponseEntity<ProductResponceSelf> getsingleproduct(@PathVariable("id") long id) throws Productnotfoundexception {
-
-        Product product=productService.getsingleproduct(id);
-
+        }
         return new ResponseEntity<>(new ProductResponceSelf(product,"Success"), HttpStatus.OK);
     }
+
+    //main
+//    @GetMapping("/product/exception/{id}")
+//    ResponseEntity<ProductResponceSelf> getsingleproduct(@PathVariable("id") long id) throws Productnotfoundexception {
+//
+//        Product product=Productservice.getsingleproduct(id);
+//
+//        return new ResponseEntity<>(new ProductResponceSelf(product,"Success"), HttpStatus.OK);
+//    }
 
 //    @ExceptionHandler(Productnotfoundexception.class)
 //    public ResponseEntity<ProductResponceSelf> handleinvalidproduct()
